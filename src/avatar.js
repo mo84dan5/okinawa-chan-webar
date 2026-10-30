@@ -22,5 +22,7 @@ export async function loadAvatar(progress){
   const hip=vrm.humanoid.getNormalizedBoneNode('hips');hip.position.copy(baseHip);hip.position.y+=.012*(1-lift)*blend;
   vrm.update(delta);
  }
- return {root,vrm,animate};
+ function resetPhysics(){root.updateMatrixWorld(true);vrm.springBoneManager?.reset();}
+ animate({speed:0,phase:0},0,0);resetPhysics();
+ return {root,vrm,animate,resetPhysics};
 }
