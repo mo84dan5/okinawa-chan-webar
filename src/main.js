@@ -1,3 +1,4 @@
+import {chatController} from './chat.js';
 import {expressionPanel} from './expressions.js';
 import './style.css';
 import * as THREE from 'three';
@@ -8,6 +9,7 @@ import {loadEngine,arModule} from './ar.js';
 window.THREE=THREE;
 const $=id=>document.getElementById(id),stick=joystick($('stick'));
 let faceView=false,avatar,motion=initialMotion(),mode='welcome',tracked=false,placed=false,hit=null,arCamera,XR8,resetPending=false,last=performance.now(),elapsed=0;
+const chat=chatController();$('expressions-panel').addEventListener('input',()=>chat.stopSpeech(),true);$('expressions-panel').addEventListener('change',()=>chat.stopSpeech(),true);
 const anchor=new THREE.Vector3(),direction=new THREE.Vector3();
 const scene=new THREE.Scene();scene.background=new THREE.Color('#e8f2ed');scene.fog=new THREE.Fog('#e8f2ed',12,25);
 const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,.01,50);
@@ -22,7 +24,7 @@ function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWi
 window.addEventListener('resize',()=>{if(mode!=='ar')resize();else{$('scene').width=innerWidth;$('scene').height=innerHeight;}});resize();
 function status(message){if($('status').textContent!==message)$('status').textContent=message;}
 function tick(activeCamera){
- const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;elapsed+=dt;if(!avatar)return;
+ const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;elapsed+=dt;if(!avatar)return;chat.update(avatar.vrm.expressionManager,elapsed);
  if(mode==='welcome'){avatar.animate(initialMotion(),dt,elapsed);return;}
  activeCamera.getWorldDirection(direction);const yaw=faceView?0:Math.atan2(-direction.x,-direction.z);
  motion=advance(motion,stick.read(),yaw,dt,(mode==='demo'||tracked&&placed)&&!document.hidden);
@@ -60,4 +62,4 @@ $('place').onclick=()=>{if(!hit||!tracked)return;anchor.copy(hit.position);motio
 $('replace').onclick=()=>{placed=false;hit=null;stick.reset();avatar.root.visible=false;$('place').hidden=false;$('place').disabled=true;$('replace').hidden=true;updateTracking(tracked);};
 $('size').onchange=()=>{resetPending=true;};
 document.addEventListener('visibilitychange',()=>{stick.reset();last=performance.now();if(mode==='ar'){if(document.hidden){tracked=false;XR8.pause();}else{XR8.resume();updateTracking(false);}}});
-try{avatar=await loadAvatar(e=>status(e.total?`キャラクターを読み込み中 ${Math.round(e.loaded/e.total*100)}%`:'キャラクターを読み込んでいます'));expressionPanel(avatar.vrm.expressionManager,$('expressions-panel'));scene.add(avatar.root);resize();$('start').disabled=false;$('demo').disabled=false;$('start').textContent='カメラで会いにいく ↗';status('準備できました · 音は出ません');}catch(error){status('読み込みに失敗しました。再読み込みしてください。');fail(error);}
+try{avatar=await loadAvatar(e=>status(e.total?`キャラクターを読み込み中 ${Math.round(e.loaded/e.total*100)}%`:'キャラクターを読み込んでいます'));expressionPanel(avatar.vrm.expressionManager,$('expressions-panel'));scene.add(avatar.root);resize();$('start').disabled=false;$('demo').disabled=false;$('start').textContent='カメラで会いにいく ↗';status('準備できました ·「話す」で会話できます');}catch(error){status('読み込みに失敗しました。再読み込みしてください。');fail(error);}
