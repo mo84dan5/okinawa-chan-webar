@@ -50,3 +50,7 @@ GitHub操作は `npm run gh -- <args>` でmo84dan5の既存認証を使用しま
 APIはGoogle公式の[generateContent](https://ai.google.dev/api/generate-content)と[TTS](https://ai.google.dev/gemini-api/docs/speech-generation)に基づきます。既定はGemini 3.5 Flash-LiteとGemini 3.8 Flash-Lite TTS。キーの権限や利用枠でGemini音声を利用できない場合は、画面に通知して端末音声を使います。
 
 設定を適用した後、☰を開き「APIキー付きURLをコピー」で設定済みキーを含むURLをコピーできます。このURLを知る人はキーを利用できるため、自分の端末への転送用として扱い、公開しないでください。実際のキーはソースや公開ビルドには含みません。
+
+### 瞬き・顔の追従・材質
+通常時は2〜6秒間隔で約0.24秒の瞬きをします。手動で目の表情を指定している間は自動瞬きを抑えます。キャラクター正面を軸とする120度の範囲（半角60度）にカメラがある場合だけ顔を向け、範囲外では元のモーションへ滑らかに戻ります。顔の追加回転は左右45度、上下20度までです。
+Blenderから書き出したMToon材質・テクスチャ・UV・透明度は維持し、白色のスタジオ照明とStandard相当のsRGB出力を使います。Blenderの照明や表示環境との完全一致を保証するものではありません。

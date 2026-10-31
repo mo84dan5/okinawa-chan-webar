@@ -1,3 +1,4 @@
+import {configureRenderer,lightScene} from './lighting.js';
 import {chatController} from './chat.js';
 import {expressionPanel} from './expressions.js';
 import './style.css';
@@ -13,8 +14,7 @@ const chat=chatController();$('expressions-panel').addEventListener('input',()=>
 const anchor=new THREE.Vector3(),direction=new THREE.Vector3();
 const scene=new THREE.Scene();scene.background=new THREE.Color('#e8f2ed');scene.fog=new THREE.Fog('#e8f2ed',12,25);
 const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,.01,50);
-const renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;
-function lightScene(target){target.add(new THREE.HemisphereLight(0xffffff,0x658785,2.5));const sun=new THREE.DirectionalLight(0xfff4df,2.5);sun.position.set(2,5,3);target.add(sun);}
+const renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));configureRenderer(renderer);
 lightScene(scene);
 const floor=new THREE.Mesh(new THREE.CircleGeometry(20,96),new THREE.MeshStandardMaterial({color:'#dcebe3',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.005;scene.add(floor);
 const grid=new THREE.GridHelper(30,60,0x9dc4bc,0xc3dcd3);grid.position.y=-.004;scene.add(grid);
@@ -25,10 +25,10 @@ window.addEventListener('resize',()=>{if(mode!=='ar')resize();else{$('scene').wi
 function status(message){if($('status').textContent!==message)$('status').textContent=message;}
 function tick(activeCamera){
  const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;elapsed+=dt;if(!avatar)return;chat.update(avatar.vrm.expressionManager,elapsed);
- if(mode==='welcome'){avatar.animate(initialMotion(),dt,elapsed);return;}
+ if(mode==='welcome'){avatar.animate(initialMotion(),document.hidden?0:dt,activeCamera);return;}
  activeCamera.getWorldDirection(direction);const yaw=faceView?0:Math.atan2(-direction.x,-direction.z);
  motion=advance(motion,stick.read(),yaw,dt,(mode==='demo'||tracked&&placed)&&!document.hidden);
- const modelScale=Number($('size').value);avatar.root.position.set(anchor.x+motion.x*modelScale,anchor.y,anchor.z+motion.z*modelScale);avatar.root.rotation.y=motion.yaw;avatar.root.scale.setScalar(Number($('size').value));avatar.animate(motion,document.hidden?0:dt,elapsed);$('jump').disabled=avatar.jumping||!(mode==='demo'||tracked&&placed)||document.hidden;$('gait').textContent=avatar.jumping?'ジャンプ':({idle:'停止',walk:'歩く',run:'走る',sprint:'全力で走る'}[motion.gait]);if(faceView&&mode==='demo'){const head=avatar.vrm.humanoid.getRawBoneNode('head').getWorldPosition(new THREE.Vector3());const closeOffset=new THREE.Vector3(0,.04,1.05*modelScale).applyAxisAngle(new THREE.Vector3(0,1,0),motion.yaw);camera.position.copy(head).add(closeOffset);camera.lookAt(head);}if(resetPending){avatar.resetPhysics();resetPending=false;}
+ const modelScale=Number($('size').value);avatar.root.position.set(anchor.x+motion.x*modelScale,anchor.y,anchor.z+motion.z*modelScale);avatar.root.rotation.y=motion.yaw;avatar.root.scale.setScalar(Number($('size').value));avatar.animate(motion,document.hidden?0:dt,activeCamera);$('jump').disabled=avatar.jumping||!(mode==='demo'||tracked&&placed)||document.hidden;$('gait').textContent=avatar.jumping?'ジャンプ':({idle:'停止',walk:'歩く',run:'走る',sprint:'全力で走る'}[motion.gait]);if(faceView&&mode==='demo'){const head=avatar.vrm.humanoid.getRawBoneNode('head').getWorldPosition(new THREE.Vector3());const closeOffset=new THREE.Vector3(0,.04,1.05*modelScale).applyAxisAngle(new THREE.Vector3(0,1,0),motion.yaw);camera.position.copy(head).add(closeOffset);camera.lookAt(head);}if(resetPending){avatar.resetPhysics();resetPending=false;}
 }
 renderer.setAnimationLoop(()=>{if(mode==='ar')return;tick(camera);renderer.render(scene,camera);});
 function playing(){document.body.classList.add('playing');$('welcome').hidden=true;$('controls').hidden=false;stick.reset();}
@@ -54,7 +54,7 @@ $('start').onclick=async()=>{
   XR8=await loadEngine();await XR8.loadChunk('slam');mode='ar';faceView=false;$('face-view').hidden=true;playing();document.body.classList.add('ar');$('mode').textContent='6DoF · AR';renderer.setAnimationLoop(null);renderer.dispose();
   const canvas=document.createElement('canvas');canvas.id='scene';canvas.width=innerWidth;canvas.height=innerHeight;$('scene').replaceWith(canvas);
   XR8.XrController.configure({disableWorldTracking:false,scale:'absolute'});
-  XR8.addCameraPipelineModules([XR8.GlTextureRenderer.pipelineModule(),XR8.Threejs.pipelineModule(),XR8.XrController.pipelineModule(),arModule({XR8,ready:({scene,camera,renderer})=>{arCamera=camera;renderer.outputColorSpace=THREE.SRGBColorSpace;lightScene(scene);scene.add(avatar.root,reticle);avatar.root.visible=false;$('place').hidden=false;updateTracking(false);},update:updateAR,tracking:updateTracking,fail})]);
+  XR8.addCameraPipelineModules([XR8.GlTextureRenderer.pipelineModule(),XR8.Threejs.pipelineModule(),XR8.XrController.pipelineModule(),arModule({XR8,ready:({scene,camera,renderer})=>{arCamera=camera;configureRenderer(renderer);lightScene(scene);scene.add(avatar.root,reticle);avatar.root.visible=false;$('place').hidden=false;updateTracking(false);},update:updateAR,tracking:updateTracking,fail})]);
   await XR8.run({canvas});
  }catch(error){fail(error);}
 };
