@@ -1,6 +1,6 @@
 {
-  "source_sha256": "8984a77a2c0a7db17a804fd2c8bd3a2c937a7a01c6d1ce40387fe07fc508607d",
-  "web_sha256": "97f30a5b6984736f1345691d643f5ae0faea533c46f8fe8bb56377efc2d1e93f",
+  "source_sha256": "ffffa160231c048289171ac7148ffa77899f4b3380ea82b325cd77b84bf020a4",
+  "web_sha256": "c302e6bfa42e1f12b5306d01fe6c1f4509f029988f8e4c926d6e36f64b0d4990",
   "optimization": "Textures reduced to 1024px. Geometry, UV, alpha, MToon, rig and springs preserved. Original kept outside repository.",
   "images": [
     {
@@ -52,17 +52,14 @@
         1024,
         1024
       ]
-    },
-    {
-      "before": [
-        4096,
-        4096
-      ],
-      "after": [
-        1024,
-        1024
-      ]
     }
   ],
-  "bytes": 12895512
+  "bytes": 16986232,
+  "source": "App-only export from authored expression Blend; canonical production VRM unchanged",
+  "expressions": {
+    "eyes": 8,
+    "mouth": 10,
+    "brows": 5
+  },
+  "spring_chains": 22
 }

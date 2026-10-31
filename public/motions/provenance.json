@@ -1,0 +1,22 @@
+{
+  "walk": {
+    "file": "walk.fbx",
+    "original_name": "Walking.fbx",
+    "sha256": "b10fb088d5ccf62e379ccfa5999bfd4c14e0b500d30e6bb05cb356c0e40496fc"
+  },
+  "run": {
+    "file": "run.fbx",
+    "original_name": "Slow Run.fbx",
+    "sha256": "0390121c1835da65a2cca4abb13e7dbb026eb8dc478b70e3935dc182c8813722"
+  },
+  "sprint": {
+    "file": "sprint.fbx",
+    "original_name": "Fast Run.fbx",
+    "sha256": "7bf81d354d331f2a419165606d4471fbfd20c35841e05affcf6126eaf84cf49e"
+  },
+  "jump": {
+    "file": "jump.fbx",
+    "original_name": "Jump.fbx",
+    "sha256": "2433e905f89188f735900e58cf5e6b0edc18133273a791d008d49a454ee79316"
+  }
+}
