@@ -10,3 +10,8 @@ test('all 23 authored expressions have nonempty valid morph binds',async()=>{
 test('model cache version matches the shipped model',async()=>{
  const {createHash}=await import('node:crypto');const bytes=await readFile(new URL('../public/models/okinawa.vrm',import.meta.url));const manifest=JSON.parse(await readFile(new URL('../public/models/provenance.json',import.meta.url),'utf8'));assert.equal(manifest.web_sha256,createHash('sha256').update(bytes).digest('hex'));
 });
+test('fringe springs follow the head with low inertia while long hair remains dynamic',async()=>{
+ const b=await readFile(new URL('../public/models/okinawa.vrm',import.meta.url));const j=JSON.parse(b.subarray(20,20+b.readUInt32LE(12))),springs=j.extensions.VRMC_springBone.springs;
+ for(const name of ['Bangs_L','Bangs_R']){const spring=springs.find(s=>s.name===name);assert.equal(spring.center,j.extensions.VRMC_vrm.humanoid.humanBones.head.node);for(const joint of spring.joints){assert.ok(joint.stiffness>=8);assert.ok(joint.dragForce>=.89);assert.ok((joint.gravityPower??0)<=.011);}}
+ assert.ok(springs.filter(s=>s.name.startsWith('Hair')).every(s=>s.center===undefined));
+});

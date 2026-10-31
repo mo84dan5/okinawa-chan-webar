@@ -1,6 +1,6 @@
 {
-  "source_sha256": "ffffa160231c048289171ac7148ffa77899f4b3380ea82b325cd77b84bf020a4",
-  "web_sha256": "c302e6bfa42e1f12b5306d01fe6c1f4509f029988f8e4c926d6e36f64b0d4990",
+  "source_sha256": "cc048ab6a4cac373828ceb0b85e130a5a54c10ef1e5c6383b344094ccb59bc3b",
+  "web_sha256": "42f33bf94434973afaf6561bf7c73296bf4fd8db010b2ba21dc5694e42e30ef1",
   "optimization": "Textures reduced to 1024px. Geometry, UV, alpha, MToon, rig and springs preserved. Original kept outside repository.",
   "images": [
     {
@@ -54,12 +54,23 @@
       ]
     }
   ],
-  "bytes": 16986232,
-  "source": "App-only export from authored expression Blend; canonical production VRM unchanged",
+  "bytes": 16986256,
+  "source": "Application expression Blend with stabilized fringe; canonical production files unchanged",
   "expressions": {
     "eyes": 8,
     "mouth": 10,
     "brows": 5
   },
-  "spring_chains": 22
+  "spring_chains": 22,
+  "fringe": {
+    "chains": [
+      "Bangs_L",
+      "Bangs_R"
+    ],
+    "head_follow_weight": 0.85,
+    "spring_weight_multiplier": 0.15,
+    "stiffness": 8,
+    "drag_force": 0.9,
+    "gravity_power": 0.01
+  }
 }
