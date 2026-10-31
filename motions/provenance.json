@@ -18,5 +18,10 @@
     "file": "jump.fbx",
     "original_name": "Jump.fbx",
     "sha256": "2433e905f89188f735900e58cf5e6b0edc18133273a791d008d49a454ee79316"
+  },
+  "idle": {
+    "file": "idle.fbx",
+    "original_name": "Idle.fbx",
+    "sha256": "424ca6652bfe50028bf0a5c1db944fb69655bb32512967f2b5287fbece25198c"
   }
 }
