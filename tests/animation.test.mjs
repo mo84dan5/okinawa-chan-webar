@@ -6,8 +6,8 @@ import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
 import {retargetMotion,animationController} from '../src/animation.js';
 import {mixamoVRMRigMap} from '../src/rig-map.js';
 function fixture(){const scene=new THREE.Group(),bones={};for(const name of new Set(Object.values(mixamoVRMRigMap))){const bone=new THREE.Bone();bone.name=name;scene.add(bone);bones[name]=bone;}bones.hips.position.y=1;return {scene,humanoid:{getNormalizedBoneNode:n=>bones[n],normalizedRestPose:{hips:{position:[0,1,0]}}}};}
-test('four actual FBX clips retarget finite rotations and in-place hips',()=>{
- for(const name of ['walk','run','sprint','jump']){
+test('five actual FBX clips retarget finite rotations and in-place hips',()=>{
+ for(const name of ['idle','walk','run','sprint','jump']){
  const buffer=fs.readFileSync(new URL(`../public/motions/${name}.fbx`,import.meta.url));
  const source=new FBXLoader().parse(buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.byteLength),'');
  const clip=retargetMotion(source,fixture(),name);assert.ok(clip.duration>.4);assert.ok(clip.tracks.length>40);
@@ -15,8 +15,18 @@ test('four actual FBX clips retarget finite rotations and in-place hips',()=>{
  }
 });
 test('jump is one shot, rejects repeats and resumes locomotion',()=>{
- const vrm=fixture();const clips=Object.fromEntries(['walk','run','sprint','jump'].map(name=>[name,new THREE.AnimationClip(name,1,[new THREE.VectorKeyframeTrack('hips.position',[0,1],[0,1,0,0,1,0])])]));
+ const vrm=fixture();const clips=Object.fromEntries(['idle','walk','run','sprint','jump'].map(name=>[name,new THREE.AnimationClip(name,1,[new THREE.VectorKeyframeTrack('hips.position',[0,1],[0,1,0,0,1,0])])]));
  const controller=animationController(vrm,clips);assert.equal(controller.jump(),true);assert.equal(controller.jump(),false);
  controller.update({gait:'run',speed:3},.5);assert.equal(controller.jumping,true);
  controller.update({gait:'run',speed:3},.6);controller.update({gait:'run',speed:3},.1);assert.equal(controller.jumping,false);assert.equal(controller.current,'run');assert.equal(controller.jump(),true);
+});
+
+test('provided idle clip loops and resumes after moving and jumping',()=>{
+ const vrm=fixture();const clips=Object.fromEntries(['idle','walk','run','sprint','jump'].map(name=>[name,new THREE.AnimationClip(name,1,[new THREE.VectorKeyframeTrack('hips.position',[0,.5,1],[0,1,0,0,1.2,0,0,1,0])])]));
+ const controller=animationController(vrm,clips),hip=vrm.humanoid.getNormalizedBoneNode('hips');
+ controller.update({gait:'idle',speed:0},.5);assert.ok(hip.position.y>1.19);
+ controller.update({gait:'idle',speed:0},1);assert.ok(hip.position.y>1.19);
+ controller.update({gait:'walk',speed:1},.3);assert.equal(controller.current,'walk');
+ controller.update({gait:'idle',speed:0},.5);assert.equal(controller.current,'idle');assert.ok(hip.position.y>1.19);
+ controller.jump();controller.update({gait:'idle',speed:0},1.01);controller.update({gait:'idle',speed:0},.5);assert.equal(controller.current,'idle');assert.ok(hip.position.y>1.19);
 });

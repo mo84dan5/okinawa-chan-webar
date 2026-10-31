@@ -25,21 +25,12 @@ export function retargetMotion(asset,vrm,name){
  return new THREE.AnimationClip(name,source.duration,tracks);
 }
 export async function loadMotions(vrm){
- const entries=await Promise.all(['walk','run','sprint','jump'].map(async name=>[name,retargetMotion(await new FBXLoader().loadAsync(`./motions/${name}.fbx`),vrm,name)]));
+ const entries=await Promise.all(['idle','walk','run','sprint','jump'].map(async name=>[name,retargetMotion(await new FBXLoader().loadAsync(`./motions/${name}.fbx`),vrm,name)]));
  return Object.fromEntries(entries);
-}
-function idleClip(vrm){
- const tracks=[];
- for(const [side,sign] of [['left',1],['right',-1]]){
-  const bone=vrm.humanoid.getNormalizedBoneNode(`${side}UpperArm`);
-  if(bone)tracks.push(new THREE.QuaternionKeyframeTrack(`${bone.name}.quaternion`,[0,1],Array(2).fill(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,-sign*1.28)).toArray()).flat()));
- }
- const hip=vrm.humanoid.getNormalizedBoneNode('hips');tracks.push(new THREE.VectorKeyframeTrack(`${hip.name}.position`,[0,1],[...hip.position.toArray(),...hip.position.toArray()]));
- return new THREE.AnimationClip('idle',1,tracks);
 }
 export function animationController(vrm,clips){
  const mixer=new THREE.AnimationMixer(vrm.scene),actions={};
- for(const [name,clip] of Object.entries({...clips,idle:idleClip(vrm)}))actions[name]=mixer.clipAction(clip);
+ for(const [name,clip] of Object.entries(clips))actions[name]=mixer.clipAction(clip);
  actions.jump.setLoop(THREE.LoopOnce,1);actions.jump.clampWhenFinished=true;
  let current='idle',jumping=false;actions.idle.play();
  mixer.addEventListener('finished',e=>{if(e.action===actions.jump)jumping=false;});
