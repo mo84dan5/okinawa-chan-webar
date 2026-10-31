@@ -7,3 +7,6 @@ test('all 23 authored expressions have nonempty valid morph binds',async()=>{
  const expression=all[name];assert.ok(expression?.morphTargetBinds?.length,name);for(const bind of expression.morphTargetBinds){assert.ok(j.meshes[j.nodes[bind.node].mesh].primitives.every(p=>p.targets[bind.index]),name);assert.equal(bind.weight,1);}
  }
 });
+test('model cache version matches the shipped model',async()=>{
+ const {createHash}=await import('node:crypto');const bytes=await readFile(new URL('../public/models/okinawa.vrm',import.meta.url));const manifest=JSON.parse(await readFile(new URL('../public/models/provenance.json',import.meta.url),'utf8'));assert.equal(manifest.web_sha256,createHash('sha256').update(bytes).digest('hex'));
+});

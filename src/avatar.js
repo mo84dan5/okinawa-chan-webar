@@ -1,10 +1,11 @@
+import provenance from '../public/models/provenance.json';
 import {loadMotions,animationController} from './animation.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
 export async function loadAvatar(progress){
  const loader=new GLTFLoader();loader.register(parser=>new VRMLoaderPlugin(parser));
- const gltf=await loader.loadAsync('./models/okinawa.vrm',progress);const vrm=gltf.userData.vrm;
+ const gltf=await loader.loadAsync(`./models/okinawa.vrm?v=${provenance.web_sha256}`,progress);const vrm=gltf.userData.vrm;
  if(!vrm)throw Error('キャラクターモデルを読み込めませんでした。');
  VRMUtils.rotateVRM0(vrm);vrm.scene.traverse(o=>{o.frustumCulled=false;});
  const root=new THREE.Group();root.add(vrm.scene);
