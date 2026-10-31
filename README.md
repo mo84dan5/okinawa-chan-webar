@@ -1,4 +1,4 @@
-# 沖縄ちゃんと、あるこう。
+# AIAO-Chanと、あるこう。
 
 8th Wallの配布エンジン（SLAMあり）とthree.jsで動くスマートフォン向け6DoF WebAR。補修済みVRMを使用し、MToon・髪と衣装のSpringBoneを維持します。
 
