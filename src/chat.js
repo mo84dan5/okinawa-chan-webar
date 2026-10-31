@@ -1,3 +1,4 @@
+import {appendGrounding} from './grounding.js';
 import {generateReply,generateVoice} from './gemini.js';
 import {speechPlayer} from './speech.js';
 export function keyUrl(href,key){
@@ -13,7 +14,7 @@ export function chatController(){
  try{key||=sessionStorage.getItem('aiao-gemini-key')??'';}catch{}
  function notice(text){$('chat-status').textContent=text;}
  function keyStatus(){$('key-copy').disabled=!key;$('key-copy-status').textContent='';$('key-status').textContent=key?'APIキー設定済み（このタブのみ）':'APIキー未設定';}
- function add(role,text){const p=document.createElement('p');p.className=role;p.textContent=text;$('chat-messages').append(p);while($('chat-messages').children.length>30)$('chat-messages').firstChild.remove();p.scrollIntoView({block:'nearest'});}
+ function add(role,text){const p=document.createElement('p');p.className=role;p.textContent=text;$('chat-messages').append(p);while($('chat-messages').children.length>30)$('chat-messages').firstChild.remove();p.scrollIntoView({block:'nearest'});return p;}
  function stop(){turn++;request?.abort();request=null;voice.stop();wasSpeaking=false;$('chat-send').disabled=false;notice('停止しました');}
  function openSettings(){keyStatus();$('api-key').value='';$('settings').showModal();}
  $('settings-open').onclick=openSettings;
@@ -27,20 +28,21 @@ export function chatController(){
  };
  $('key-clear').onclick=()=>{stop();key='';$('api-key').value='';try{sessionStorage.removeItem('aiao-gemini-key');}catch{}keyStatus();};
  $('chat-toggle').onclick=()=>{const show=$('chat-panel').hidden;$('chat-panel').hidden=!show;$('chat-toggle').setAttribute('aria-expanded',String(show));if(show)$('chat-input').focus();};
- $('chat-close').onclick=()=>{$('chat-panel').hidden=true;$('chat-toggle').setAttribute('aria-expanded','false');};
+ function closeChat(){$('chat-panel').hidden=true;$('chat-toggle').setAttribute('aria-expanded','false');$('chat-input').blur();$('chat-toggle').focus();}
+ $('chat-close').onclick=closeChat;
  $('chat-stop').onclick=stop;
  $('chat-clear').onclick=()=>{stop();history.length=0;lastReply='';audio=null;$('chat-messages').replaceChildren();$('chat-replay').disabled=true;notice('会話を消去しました');};
  async function replay(){if(!lastReply)return;try{await voice.unlock();if(audio)await voice.play(audio);else voice.device(lastReply);notice('読み上げ中');}catch{notice('音声を再生できませんでした。端末の音声設定を確認してください。');}}
  $('chat-replay').onclick=replay;
  $('chat-form').onsubmit=async e=>{
   e.preventDefault();const text=$('chat-input').value.trim();if(!text||request)return;if(!key){notice('設定からAPIキーを入力してください');openSettings();return;}
-  stop();const token=turn;request=new AbortController();const controller=request,signal=controller.signal;$('chat-send').disabled=true;$('chat-input').value='';audio=null;lastReply='';$('chat-replay').disabled=true;add('user',text);notice('考えています…');
+  stop();const token=turn;request=new AbortController();const controller=request,signal=controller.signal;$('chat-send').disabled=true;$('chat-input').value='';audio=null;lastReply='';$('chat-replay').disabled=true;add('user',text);notice('考えています…');closeChat();$('chat-toggle').textContent='話す · 応答中';
   const speechMode=$('voice-mode').value;
   if(speechMode!=='off')voice.unlock().catch(()=>{});
   const timer=setTimeout(()=>controller.abort(),60000);
   try{
-   const result=await generateReply({key,text,history,model:$('gemini-model').value,signal});if(token!==turn)return;
-   lastReply=result.text;history.push({role:'user',parts:[{text}]},{role:'model',parts:[{text:lastReply}]});if(history.length>12)history.splice(0,history.length-12);add('assistant',lastReply);
+   const result=await generateReply({key,text,history,model:$('gemini-model').value,grounding:$('search-grounding').checked,signal});if(token!==turn)return;
+   lastReply=result.text;history.push({role:'user',parts:[{text}]},{role:'model',parts:[{text:lastReply}]});if(history.length>12)history.splice(0,history.length-12);const answer=add('assistant',lastReply);appendGrounding(answer,result.grounding);$('chat-toggle').textContent='話す · 返答あり';
    $('token-usage').textContent=result.usage?.totalTokenCount?`今回のテキスト: ${result.usage.totalTokenCount} tokens`:'利用量はGoogle AI Studioで確認できます';
    if(speechMode==='off'){notice('返答しました');return;}
    $('chat-replay').disabled=false;
@@ -48,7 +50,7 @@ export function chatController(){
    notice('音声を準備しています…');
    try{audio=await generateVoice({key,text:lastReply,signal});if(token!==turn)return;await voice.play(audio);notice('読み上げ中');}
    catch(error){if(signal.aborted||token!==turn)throw error;audio=null;notice('Gemini音声を利用できないため、端末の音声で読み上げます');voice.device(lastReply);}
-  }catch(error){if(token===turn)notice(error.name==='AbortError'?'通信を中止しました。もう一度送信できます。':error.message);}
+  }catch(error){if(token===turn){$('chat-panel').hidden=false;$('chat-toggle').setAttribute('aria-expanded','true');$('chat-toggle').textContent='話す';notice(error.name==='AbortError'?'通信を中止しました。もう一度送信できます。':error.message);}}
   finally{clearTimeout(timer);if(token===turn){request=null;$('chat-send').disabled=false;}}
  };
  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});

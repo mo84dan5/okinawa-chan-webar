@@ -56,3 +56,6 @@ APIはGoogle公式の[generateContent](https://ai.google.dev/api/generate-conten
 Blenderから書き出したMToon材質・テクスチャ・UV・透明度は維持し、白色のスタジオ照明とStandard相当のsRGB出力を使います。Blenderの照明や表示環境との完全一致を保証するものではありません。
 
 Gemini音声は感情の強さ0.7/1.0、意図的に小さな声、軽くかすれたanime/kawaii/moeの演技を指示します。0.7は演技の指示で、APIのsampling temperatureではありません。再生ゲインは0.55（約−5.2dB）です。口パクの解析は減衰前の音声を使います。端末音声の代替時も音量を0.55にしますが、声質は端末に依存します。
+
+Gemini音声の既定はLedaです。送信が受理されると会話パネルを閉じ、音声はそのまま再生します。「話す」で返答と参照元を再表示できます。通信エラー時はパネルを開いて理由を表示します。
+設定の「Google検索で回答を補強する」は既定ON。検索が必要かはGeminiが判断します。検索した回答には参照リンク・対応する文章・Google検索候補を表示します。検索には利用枠に応じた料金が発生します。仕様: https://ai.google.dev/gemini-api/docs/generate-content/google-search
