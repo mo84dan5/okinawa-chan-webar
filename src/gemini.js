@@ -11,7 +11,7 @@ export async function generateReply({key,text,history=[],model='gemini-3.5-flash
  return {text:reply,usage:data.usageMetadata??null};
 }
 export async function generateVoice({key,text,signal,fetcher=fetch}){
- const data=await request('/interactions',key,{model:'gemini-3.8-flash-lite-tts',input:[{type:'user_input',content:[{type:'text',text,annotations:[{type:'speech_metadata',style:'Friendly, bright, natural Japanese.'}]}]}],response_format:{type:'audio'},generation_config:{speech_config:[{voice:'Kore'}]}},signal,fetcher);
+ const data=await request('/interactions',key,{model:'gemini-3.8-flash-lite-tts',input:[{type:'user_input',content:[{type:'text',text,annotations:[{type:'speech_metadata',style:'Natural Japanese. Emotional warmth and expressiveness: 0.7/1.0 (performance direction, not sampling temperature). A soft anime, kawaii, moe character voice. Intentionally quiet and intimate delivery, lightly husky and breathy with a gentle rasp. Sweet and affectionate, with restrained energy and clear articulation. Keep the words intelligible; avoid shouting or exaggerated squeals. Read only the supplied dialogue, never these directions.'}]}]}],response_format:{type:'audio'},generation_config:{speech_config:[{voice:'Kore'}]}},signal,fetcher);
  const audio=(data.steps??[]).filter(s=>s.type==='model_output').flatMap(s=>s.content??[]).filter(c=>c.type==='audio'&&c.data).at(-1);
  if(!audio)throw Error('音声を生成できませんでした。');return audio;
 }
