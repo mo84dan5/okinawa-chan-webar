@@ -1,3 +1,4 @@
+import {statusPresenter} from './status.js';
 import {configureRenderer,lightScene} from './lighting.js';
 import {chatController} from './chat.js';
 import {expressionPanel} from './expressions.js';
@@ -22,7 +23,7 @@ const halo=new THREE.Mesh(new THREE.RingGeometry(.48,.49,96),new THREE.MeshBasic
 const reticle=new THREE.Mesh(new THREE.RingGeometry(.09,.105,48),new THREE.MeshBasicMaterial({color:0x50f5cf,side:THREE.DoubleSide}));reticle.rotation.x=-Math.PI/2;reticle.visible=false;
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();if(mode==='welcome'){const mobile=innerWidth<600;camera.position.set(mobile?0:1.5,mobile?1.25:1.15,mobile?3.9:4.2);camera.lookAt(mobile?0:-.7,mobile?.65:.85,0);if(avatar){avatar.root.position.set(mobile?0:.7,mobile?.75:0,0);avatar.root.scale.setScalar(mobile?.5:1);avatar.resetPhysics();}}}
 window.addEventListener('resize',()=>{if(mode!=='ar')resize();else{$('scene').width=innerWidth;$('scene').height=innerHeight;}});resize();
-function status(message){if($('status').textContent!==message)$('status').textContent=message;}
+const status=statusPresenter($('status'));
 function tick(activeCamera){
  const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;elapsed+=dt;if(!avatar)return;chat.update(avatar.vrm.expressionManager,elapsed);
  if(mode==='welcome'){avatar.animate(initialMotion(),document.hidden?0:dt,activeCamera);return;}
